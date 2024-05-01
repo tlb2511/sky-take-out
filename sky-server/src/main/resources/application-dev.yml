@@ -11,3 +11,7 @@ sky:
     access-key-id: LTAI5tG6LRdosMJsXctwRxyM
     access-key-secret: UhJNFPm9b76UylfJnf78qCX8AxntIb
     bucket-name: test-oss-0429
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456

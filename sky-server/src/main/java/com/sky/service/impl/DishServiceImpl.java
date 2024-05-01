@@ -81,11 +81,41 @@ public class DishServiceImpl implements DishService {
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
 
-        for(Long id : ids){
-            //3、删除菜品
-            dishMapper.deleteById(id);
-            //4、删除菜品对应的口味
-            dishFlavorsMapper.deleteById(id);
+//        for(Long id : ids){
+//            //3、删除菜品
+//            dishMapper.deleteById(id);
+//            //4、删除菜品对应的口味
+//            dishFlavorsMapper.deleteByDishId(id);
+//        }
+        //可以改成批量删除 delete from dish where id in (***)
+        dishMapper.deleteByIds(ids);
+        dishFlavorsMapper.deleteByDishIds(ids);
+    }
+
+    @Transactional
+    public void updateDish(DishDTO dishDTO) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+        //1、更新dish
+        dishMapper.update(dish);
+        //2、删除关联的flavor
+        dishFlavorsMapper.deleteByDishId(dishDTO.getId());
+        //3、是否有flavor
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        if(flavors != null && flavors.size() > 0){
+            flavors.forEach(flavor->{
+                flavor.setDishId(dish.getId());
+            });
+            dishFlavorsMapper.save(flavors);
         }
+    }
+
+    public DishVO queryDishById(Long id) {
+        DishVO dishVO = new DishVO();
+        Dish dish = dishMapper.selectById(id);
+        BeanUtils.copyProperties(dish,dishVO);
+        List<DishFlavor> dishFlavor = dishFlavorsMapper.selectByDishId(id);
+        dishVO.setFlavors(dishFlavor);
+        return dishVO;
     }
 }
